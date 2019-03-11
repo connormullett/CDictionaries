@@ -24,6 +24,7 @@ Dictionary* insert(int key, char* value, Dictionary* dict);
 Dictionary* delete(char* key, Dictionary* dict);
 char* search(int key, Dictionary* dict);
 void deleteDictionary(Dictionary* dict);
+void printDictionary(Dictionary* dict);
 
 
 int main() {
@@ -47,6 +48,7 @@ void leftLeft(Node* g);
 void leftRight(Node* g);
 void rightLeft(Node* g);
 void rightRight(Node* g);
+void printTree(Node* node);
 
 
 // Nodes
@@ -221,4 +223,8 @@ Dictionary* create() {
 void deleteDictionary(Dictionary* dict){
   deleteTree(dict->head);
   return;
+}
+
+void printTree(){
+  
 }

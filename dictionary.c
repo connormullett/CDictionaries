@@ -5,30 +5,29 @@
 
 struct Node {
   int key;
-  char *value;
+  char* value;
   bool color;
+  struct Node* parent;
+  struct Node* left;
+  struct Node* right;
 };
 
+typedef struct Node Node;
+
 typedef struct {
-  struct Node **elements;
-  int length;
+  Node* head;
 } Dictionary;
 
-Dictionary *create();
-Dictionary *insert(int key, char *value, Dictionary *dict);
-Dictionary *delete (char *key, Dictionary *dict);
-char *search(char *key, Dictionary *dict);
+Dictionary* create();
+Dictionary* insert(int key, char* value, Dictionary* dict);
+Dictionary* delete (char* key, Dictionary* dict);
+char* search(char* key, Dictionary* dict);
 
 int main() { return 0; }
 
-Dictonary *create() {
-  Dictionary *dict = (Dictonary *)malloc(sizeof(Dictonary));
-  dict->elements = NULL;
-  dict->length = 0;
+Dictonary* create() {
+  Dictionary* dict = (Dictonary*)malloc(sizeof(Dictonary));
+  dict->head = NULL;
 
   return dict;
 }
-
-int left(int i);
-int right(int i);
-int parent(int i);

@@ -35,6 +35,8 @@ int main() {
     dict = insert(i, "test", dict);
   }
 
+  printDictionary(dict);
+
   return 0;
 }
 
@@ -79,77 +81,99 @@ void deleteTree(Node* node){
   free(node);
 }
 
-Node* insertNode(Node* node, Node* head){
-  printf("node = %p  head = %p\n", node, head);
-  printf("leftchild = %p  rightchild = %p\n", head->left, head->right);
-  int key = node->key;
-
-  if(key < head->key){
-    if(!head->left){
-      head->left = node;
-      printf("inserted %p left\n", node);
-      node->parent = head;
-      return head;
-    }
-    insertNode(node, head->left);
-  } else {
-    if(!head->right){
-      head->right = node;
-      printf("inserted %p right\n", node);
-      node->parent = head;
-      return head;
-    }
-    insertNode(node, head->right);
+void printTree(Node* node){
+  if(node->left){
+    printTree(node->left);
   }
-  return head;
+
+  if(node->right){
+    printTree(node->right);
+  }
+
+  printf("%d\n", node->key);
 }
 
-Node* balance(Node* node){
-  printf("balance called ... \n");
-  if(!node->parent){
-    printf("new inserted node is root\n");
-    node->color = true;
-  } else {
-    printf("new node is not root\n");
-    if(!node->parent->parent){
-      printf("no grandparent\n");
-      return node;
-    }
-    printf("was not grandparent\n");
-
-    // if the uncle is red(false)
-    if(node->parent->parent && uncle(node) && !(uncle(node)->color)){
-      printf("uncle is red\n");
-      node->parent->color = true;
-      uncle(node)->color = true;
-      node->parent->parent->color = false;
-      return balance(node->parent->parent);
-    //if the uncle is black(true) or null
+Node* insertNode(Node* node, Node* head){
+  if(node->key < head->key){
+    if(head->left){
+      return insertNode(node, head->left);
     } else {
-      printf("uncle is black\n");
-      if(node->parent->left == node){
-        if(node->parent->parent->left == node->parent){
-          leftLeft(node->parent->parent);
-        } else {
-          leftRight(node->parent->parent);
-        }
-      } else {
-        if(node->parent->parent->left == node->parent){
-          rightLeft(node->parent->parent);
-        } else {
-          rightRight(node->parent->parent);
-        }
-      }
+      head->left = node;
+      node->parent = head;
+    }
+  } else {
+    if(head->right){
+      return insertNode(node, head->right);
+    } else {
+      head->right = node;
+      node->parent = head;
     }
   }
-
   return node;
 }
 
+Node* balance(Node* node){
+  // //printf("balance called ... \n");
+  // if(!node->parent){
+  //   //printf("new inserted node is root\n");
+  //   node->color = true;
+  // } else {
+  //   //printf("new node is not root\n");
+  //   if(!node->parent->parent){
+  //     //printf("no grandparent\n");
+  //     return node;
+  //   }
+  //   //printf("was not grandparent\n");
+  //
+  //   // if the uncle is red(false)
+  //   if(node->parent->parent && uncle(node) && !(uncle(node)->color)){
+  //     //printf("uncle is red\n");
+  //     node->parent->color = true;
+  //     uncle(node)->color = true;
+  //     node->parent->parent->color = false;
+  //     return balance(node->parent->parent);
+  //   //if the uncle is black(true) or null
+  //   } else {
+  //     //printf("uncle is black\n");
+  //     if(node->parent->left == node){
+  //       if(node->parent->parent->left == node->parent){
+  //         leftLeft(node->parent->parent);
+  //       } else {
+  //         leftRight(node->parent->parent);
+  //       }
+  //     } else {
+  //       if(node->parent->parent->left == node->parent){
+  //         rightLeft(node->parent->parent);
+  //       } else {
+  //         rightRight(node->parent->parent);
+  //       }
+  //     }
+  //   }
+  // }
+  //
+  // return node;
+
+  //node has no parent, its the root
+  if(!node->parent){
+    node->color = true;
+  //parent is root
+  } else if(!node->parent->parent){
+    node->color = false;
+  //is an uncle and its black or there is no uncle
+  } else if((uncle(node) && uncle(node)->color) || uncle(node)->color){
+    rotation(node->parent->parent);
+  //uncle is red
+  } else {
+    node->parent->color = true;
+    uncle(node)->color = true;
+    balance(node->parent->parent);
+  }
+}
+
 Node* uncle(Node* node){
-  printf("entered uncle\n");
+  //printf("entered uncle\n");
   if(node && node->parent && node->parent->parent){
-    printf("grandparent exists\n");
+    //printf("grandparent exists\n");
     if(node->parent->parent->left == node->parent){
       return node->parent->parent->right;
     } else {
@@ -193,6 +217,7 @@ void rightLeft(Node* g){
   rightRight(g);
 }
 
+
 // Dictionary
 Dictionary* insert(int key, char* value, Dictionary* dict){
   Node* node = createNode(key, value);
@@ -201,11 +226,11 @@ Dictionary* insert(int key, char* value, Dictionary* dict){
     dict->head = node;
   }else{
     printf("entered insertNode .. \n");
-    dict->head = insertNode(node, dict->head);  // TODO
+    insertNode(node, dict->head);  // TODO
     printf("exited insertNode .. \n");
   }
 
-  dict->head = balance(node);
+  balance(node);
   return dict;
 }
 
@@ -225,6 +250,8 @@ void deleteDictionary(Dictionary* dict){
   return;
 }
 
-void printTree(){
-  
+void printDictionary(Dictionary* dict){
+  printTree(dict->head);
+  printf("\n");
+  return;
 }

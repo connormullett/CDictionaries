@@ -26,7 +26,16 @@ char* search(int key, Dictionary* dict);
 void deleteDictionary(Dictionary* dict);
 
 
-int main() { return 0; }
+int main() {
+
+  Dictionary* dict = create();
+
+  for(int i = 0; i < 5; ++i){
+    dict = insert(i, "test", dict);
+  }
+
+  return 0;
+}
 
 
 Node* createNode(int key, char* value);
@@ -69,11 +78,14 @@ void deleteTree(Node* node){
 }
 
 Node* insertNode(Node* node, Node* head){
+  printf("node = %p  head = %p\n", node, head);
+  printf("leftchild = %p  rightchild = %p\n", head->left, head->right);
   int key = node->key;
 
   if(key < head->key){
     if(!head->left){
       head->left = node;
+      printf("inserted %p left\n", node);
       node->parent = head;
       return head;
     }
@@ -81,6 +93,7 @@ Node* insertNode(Node* node, Node* head){
   } else {
     if(!head->right){
       head->right = node;
+      printf("inserted %p right\n", node);
       node->parent = head;
       return head;
     }
@@ -90,15 +103,28 @@ Node* insertNode(Node* node, Node* head){
 }
 
 Node* balance(Node* node){
+  printf("balance called ... \n");
   if(!node->parent){
+    printf("new inserted node is root\n");
     node->color = true;
   } else {
-    if(node->parent->parent && !uncle(node)->color){
+    printf("new node is not root\n");
+    if(!node->parent->parent){
+      printf("no grandparent\n");
+      return node;
+    }
+    printf("was not grandparent\n");
+
+    // if the uncle is red(false)
+    if(node->parent->parent && uncle(node) && !(uncle(node)->color)){
+      printf("uncle is red\n");
       node->parent->color = true;
       uncle(node)->color = true;
       node->parent->parent->color = false;
       return balance(node->parent->parent);
+    //if the uncle is black(true) or null
     } else {
+      printf("uncle is black\n");
       if(node->parent->left == node){
         if(node->parent->parent->left == node->parent){
           leftLeft(node->parent->parent);
@@ -114,17 +140,21 @@ Node* balance(Node* node){
       }
     }
   }
+
+  return node;
 }
 
 Node* uncle(Node* node){
-    if(node && node->parent && node->parent->parent){
-      if(node->parent->parent->left == node->parent){
-        return node->parent->parent->right;
-      } else {
-        return node->parent->parent->left;
-      }
+  printf("entered uncle\n");
+  if(node && node->parent && node->parent->parent){
+    printf("grandparent exists\n");
+    if(node->parent->parent->left == node->parent){
+      return node->parent->parent->right;
+    } else {
+      return node->parent->parent->left;
     }
-    return NULL;
+  }
+  return NULL;
 }
 
 void leftLeft(Node* g){
@@ -165,8 +195,16 @@ void rightLeft(Node* g){
 Dictionary* insert(int key, char* value, Dictionary* dict){
   Node* node = createNode(key, value);
 
-  dict->head = insertNode(node, dict->head);  // TODO
+  if(!dict->head){
+    dict->head = node;
+  }else{
+    printf("entered insertNode .. \n");
+    dict->head = insertNode(node, dict->head);  // TODO
+    printf("exited insertNode .. \n");
+  }
+
   dict->head = balance(node);
+  return dict;
 }
 
 Dictionary* create() {

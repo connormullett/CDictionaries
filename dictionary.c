@@ -152,7 +152,7 @@ void leftRight(Node* g){
   leftLeft(g);
 }
 
-void rightRight(Node* g){
+void rightLeft(Node* g){
   Node* p = g->right;
   Node* x = p->left;
   g->right = x;

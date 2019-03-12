@@ -113,61 +113,56 @@ Node* insertNode(Node* node, Node* head){
 }
 
 Node* balance(Node* node){
-  // //printf("balance called ... \n");
-  // if(!node->parent){
-  //   //printf("new inserted node is root\n");
-  //   node->color = true;
-  // } else {
-  //   //printf("new node is not root\n");
-  //   if(!node->parent->parent){
-  //     //printf("no grandparent\n");
-  //     return node;
-  //   }
-  //   //printf("was not grandparent\n");
-  //
-  //   // if the uncle is red(false)
-  //   if(node->parent->parent && uncle(node) && !(uncle(node)->color)){
-  //     //printf("uncle is red\n");
-  //     node->parent->color = true;
-  //     uncle(node)->color = true;
-  //     node->parent->parent->color = false;
-  //     return balance(node->parent->parent);
-  //   //if the uncle is black(true) or null
-  //   } else {
-  //     //printf("uncle is black\n");
-  //     if(node->parent->left == node){
-  //       if(node->parent->parent->left == node->parent){
-  //         leftLeft(node->parent->parent);
-  //       } else {
-  //         leftRight(node->parent->parent);
-  //       }
-  //     } else {
-  //       if(node->parent->parent->left == node->parent){
-  //         rightLeft(node->parent->parent);
-  //       } else {
-  //         rightRight(node->parent->parent);
-  //       }
-  //     }
-  //   }
-  // }
-  //
-  // return node;
-
-  //node has no parent, its the root
+  // if the node has no parent
   if(!node->parent){
     node->color = true;
-  //parent is root
-  } else if(!node->parent->parent){
-    node->color = false;
-  //is an uncle and its black or there is no uncle
-  } else if((uncle(node) && uncle(node)->color) || uncle(node)->color){
-    rotation(node->parent->parent);
-  //uncle is red
+  // else, check if the node has a grandparent
   } else {
-    node->parent->color = true;
-    uncle(node)->color = true;
-    balance(node->parent->parent);
+    if(!node->parent->parent){
+      return node;
+    }
+
+    // if the uncle is red(false)
+    if(node->parent->parent && uncle(node) && !(uncle(node)->color)){
+      node->parent->color = true;
+      uncle(node)->color = true;
+      node->parent->parent->color = false;
+      return balance(node->parent->parent);
+    //if the uncle is black(true) or null
+    } else {
+      if(node->parent->left == node){
+        if(node->parent->parent->left == node->parent){
+          leftLeft(node->parent->parent);
+        } else {
+          leftRight(node->parent->parent);
+        }
+      } else {
+        if(node->parent->parent->left == node->parent){
+          rightLeft(node->parent->parent);
+        } else {
+          rightRight(node->parent->parent);
+        }
+      }
+    }
   }
+
+  return node;
+
+  //node has no parent, its the root
+  // if(!node->parent){
+  //   node->color = true;
+  // //parent is root
+  // } else if(!node->parent->parent){
+  //   node->color = false;
+  // //is an uncle and its black or there is no uncle
+  // } else if((uncle(node) && uncle(node)->color) || uncle(node)->color){
+  //   rotation(node->parent->parent);
+  // //uncle is red
+  // } else {
+  //   node->parent->color = true;
+  //   uncle(node)->color = true;
+  //   balance(node->parent->parent);
+  // }
 }
 
 Node* uncle(Node* node){

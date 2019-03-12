@@ -179,9 +179,20 @@ Node* uncle(Node* node){
 }
 
 void leftLeft(Node* g){
-  Node* p = g->left;
-  g->left = p->right;
-  p->right = g;
+  /* RIGHT ROTATION
+   OS = opposite side = left
+   RS = rotation side = right
+   new node at the left of grandparent */
+  Node* p = g->left; // parent/pivot = root(grandparent) opposite side
+
+  // left of grandparent is right of parent
+  g->left = p->right; // roots OS = pivot/parent RS
+
+  // the parents right is the grandparent
+  p->right = g; // pivots rotation side = root
+
+  g = p; // root = pivot (root is g, pivot is parent)
+
   p->color = true;
   g->color = false;
 }
@@ -190,6 +201,7 @@ void rightRight(Node* g){
   Node* p = g->right;
   g->right = p->left;
   p->right = g;
+  g = p;
   p->color = true;
   g->color = false;
 }
@@ -220,9 +232,9 @@ Dictionary* insert(int key, char* value, Dictionary* dict){
   if(!dict->head){
     dict->head = node;
   }else{
-    printf("entered insertNode .. \n");
+    // printf("entered insertNode .. \n");
     insertNode(node, dict->head);  // TODO
-    printf("exited insertNode .. \n");
+    // printf("exited insertNode .. \n");
   }
 
   balance(node);

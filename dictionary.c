@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct Node {
   int key;
@@ -38,8 +39,8 @@ int main() {
 
   char* value = searchDictionary(2, dict);  // value exists
   char* noneValue = searchDictionary(20, dict);  // value doesnt exist in dict
-  printf("%s\n", value);
-  printf("%s\n", noneValue);
+  printf("Searching for 2  :: %s\n", value);
+  printf("Searching for 20 :: %s\n", noneValue);
 
   return 0;
 }
@@ -296,7 +297,7 @@ Dictionary* create() {
 
 char* searchDictionary(int key, Dictionary* dict){
   Node* node = searchNode(key, dict->head);
-  if(node->key != key) return "nil";
+  if(node->key != key) return " ";
   return node->value;
 }
 

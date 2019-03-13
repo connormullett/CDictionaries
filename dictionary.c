@@ -24,16 +24,22 @@ Dictionary* delete(char* key, Dictionary* dict);
 char* search(int key, Dictionary* dict);
 void deleteDictionary(Dictionary* dict);
 void printDictionary(Dictionary* dict);
+char* searchDictionary(int key, Dictionary* dict);
 
 
 int main() {
 
   Dictionary* dict = create();
 
-  for(int i = 0; i < 5; ++i){
+  for(int i = 0; i < 15; ++i){
     dict = insert(i, "test", dict);
     printDictionary(dict);
   }
+
+  char* value = searchDictionary(2, dict);  // value exists
+  char* noneValue = searchDictionary(20, dict);  // value doesnt exist in dict
+  printf("%s\n", value);
+  printf("%s\n", noneValue);
 
   return 0;
 }
@@ -51,6 +57,7 @@ void leftRight(Node* g);
 void rightLeft(Node* g);
 void rightRight(Node* g);
 void printTree(Node* node);
+Node* searchNode(int key, Node* head);
 
 
 // Nodes
@@ -246,6 +253,17 @@ void rightLeft(Node* g){
   rightRight(g);
 }
 
+Node* searchNode(int key, Node* head){
+  if(!head || head->key == key) return head;
+  if(head->key < key){
+    if(!head->right) return head;
+    return searchNode(key, head->right);
+  } else {
+    if(!head->left) return head;
+    return searchNode(key, head->left);
+  }
+}
+
 
 // Dictionary
 Dictionary* insert(int key, char* value, Dictionary* dict){
@@ -274,6 +292,12 @@ Dictionary* create() {
   dict->head = NULL;
 
   return dict;
+}
+
+char* searchDictionary(int key, Dictionary* dict){
+  Node* node = searchNode(key, dict->head);
+  if(node->key != key) return "nil";
+  return node->value;
 }
 
 void deleteDictionary(Dictionary* dict){

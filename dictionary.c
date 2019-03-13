@@ -1,4 +1,3 @@
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,9 +32,8 @@ int main() {
 
   for(int i = 0; i < 5; ++i){
     dict = insert(i, "test", dict);
+    printDictionary(dict);
   }
-
-  printDictionary(dict);
 
   return 0;
 }
@@ -45,6 +43,8 @@ Node* createNode(int key, char* value);
 void deleteTree(Node* node);
 Node* insertNode(Node* node, Node* head);
 Node* balance(Node* node);
+Node* rotation(Node* node);
+Node* root(Node* node);
 Node* uncle(Node* node);
 void leftLeft(Node* g);
 void leftRight(Node* g);
@@ -85,12 +85,10 @@ void printTree(Node* node){
   if(node->left){
     printTree(node->left);
   }
-
   if(node->right){
     printTree(node->right);
   }
-
-  printf("%d\n", node->key);
+  printf("%d ", node->key);
 }
 
 Node* insertNode(Node* node, Node* head){
@@ -113,56 +111,55 @@ Node* insertNode(Node* node, Node* head){
 }
 
 Node* balance(Node* node){
-  // if the node has no parent
+  //node has no parent, its the root
   if(!node->parent){
     node->color = true;
-  // else, check if the node has a grandparent
+  //parent is root
+  } else if(!node->parent->parent){
+    node->color = false;
+  //is an uncle and its black or there is no uncle
+  } else if((uncle(node) && uncle(node)->color) || !uncle(node)){
+    rotation(node);
+  //uncle is red
   } else {
-    if(!node->parent->parent){
-      return node;
-    }
+    node->parent->color = true;
+    uncle(node)->color = true;
+    balance(node->parent->parent);
+  }
+return node;
+}
 
-    // if the uncle is red(false)
-    if(node->parent->parent && uncle(node) && !(uncle(node)->color)){
-      node->parent->color = true;
-      uncle(node)->color = true;
-      node->parent->parent->color = false;
-      return balance(node->parent->parent);
-    //if the uncle is black(true) or null
+/*
+ * Is given a nod of a sub tree solves for the tree layout
+ * then rotates approprately.
+ */
+Node* rotation(Node* node){
+  // Figures out if the x is on the left or right of parent
+  if(node->parent->left == node){
+    // Node is the left child of parent.
+    if(node->parent->parent->left == node->parent){
+      // Node's parent is the left child of it's grandparent
+      leftLeft(node->parent->parent);
     } else {
-      if(node->parent->left == node){
-        if(node->parent->parent->left == node->parent){
-          leftLeft(node->parent->parent);
-        } else {
-          leftRight(node->parent->parent);
-        }
-      } else {
-        if(node->parent->parent->left == node->parent){
-          rightLeft(node->parent->parent);
-        } else {
-          rightRight(node->parent->parent);
-        }
-      }
+      // Node's parent is the right child of it's grandparent.
+      rightLeft(node->parent->parent);
+    }
+  } else {
+    // Node is the right child of parent.
+    if(node->parent->parent->left == node->parent){
+      // Node's parent is the left child of it's grandparent
+      leftRight(node->parent->parent);
+    } else {
+      // Node's parent is the right child of it's grandparent.
+      rightRight(node->parent->parent);
     }
   }
+return node;
+}
 
+Node* root(Node* node){
+  if(node->parent != NULL) return root(node->parent);
   return node;
-
-  //node has no parent, its the root
-  // if(!node->parent){
-  //   node->color = true;
-  // //parent is root
-  // } else if(!node->parent->parent){
-  //   node->color = false;
-  // //is an uncle and its black or there is no uncle
-  // } else if((uncle(node) && uncle(node)->color) || uncle(node)->color){
-  //   rotation(node->parent->parent);
-  // //uncle is red
-  // } else {
-  //   node->parent->color = true;
-  //   uncle(node)->color = true;
-  //   balance(node->parent->parent);
-  // }
 }
 
 Node* uncle(Node* node){
@@ -187,31 +184,53 @@ void leftLeft(Node* g){
 
   // left of grandparent is right of parent
   g->left = p->right; // roots OS = pivot/parent RS
+  if(p->right) p->right->parent = g;
 
   // the parents right is the grandparent
   p->right = g; // pivots rotation side = root
-
-  g = p; // root = pivot (root is g, pivot is parent)
+  p->parent = g->parent;
+  g->parent = p;
 
   p->color = true;
   g->color = false;
+
+  if(p->parent){
+    if(p->parent->right == g){
+      p->parent->right = p;
+    } else {
+      p->parent->left = p;
+    }
+  }
 }
 
 void rightRight(Node* g){
   Node* p = g->right;
   g->right = p->left;
-  p->right = g;
-  g = p;
+  if(p->left) p->left->parent = g;
+  p->left = g;
+  p->parent = g->parent;
+  g->parent = p;
   p->color = true;
   g->color = false;
+
+  if(p->parent){
+    if(p->parent->right == g){
+      p->parent->right = p;
+    } else {
+      p->parent->left = p;
+    }
+  }
 }
 
 void leftRight(Node* g){
   Node* p = g->left;
   Node* x = p->right;
   g->left = x;
+  x->parent = g;
   p->right = x->left;
+  if(x->left) x->left->parent = p;
   x->left = p;
+  p->parent = x;
   leftLeft(g);
 }
 
@@ -219,8 +238,11 @@ void rightLeft(Node* g){
   Node* p = g->right;
   Node* x = p->left;
   g->right = x;
+  x->parent =g;
   p->left = x->right;
+  if(x->right) x->right->parent = p;
   x->right = p;
+  p->parent = x;
   rightRight(g);
 }
 
@@ -231,13 +253,15 @@ Dictionary* insert(int key, char* value, Dictionary* dict){
 
   if(!dict->head){
     dict->head = node;
+    node->parent = NULL;
+    node->left   = NULL;
+    node->right  = NULL;
   }else{
-    // printf("entered insertNode .. \n");
-    insertNode(node, dict->head);  // TODO
-    // printf("exited insertNode .. \n");
+    insertNode(node, dict->head);
   }
 
   balance(node);
+  dict->head = root(node);
   return dict;
 }
 
